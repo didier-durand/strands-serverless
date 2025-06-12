@@ -1,0 +1,4 @@
+# https://github.com/hadolint/hadolint
+ignored:
+  - DL3013 # warning: Pin versions in pip installs
+  - DL3033 # warning: Specify version with `yum install -y <package>-<version>`
