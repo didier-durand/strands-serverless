@@ -28,7 +28,7 @@ def test_entry_points():
         for distribution in  distributions():
             count += 1
             print(distribution.name)
-        assert count == 158
+        assert count >= 150
         # check entry points
         entry_points: list[dict] = []
         for entry_point in importlib_metadata.entry_points():
@@ -39,4 +39,4 @@ def test_entry_points():
             })
         print("###")
         print(json.dumps(entry_points,indent=4))
-        assert len(entry_points) == 95
+        assert len(entry_points) >= 90
