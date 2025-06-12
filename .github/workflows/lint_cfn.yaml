@@ -1,0 +1,23 @@
+name: 'cfn-lint template(s)'
+
+on:
+
+  workflow_dispatch:  # manual triggering
+
+  push:
+    paths:
+      - '.github/workflows/lint_cfn.yaml'
+      - 'cfn/cfn-strands-lightsail-chainlit.yaml'
+
+jobs:
+
+  lint_CFN_templates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'checkout git code'
+        uses: actions/checkout@v4
+      - name: 'lint CFN template(s)'
+        run: |
+          pip install cfn-lint
+          echo "linting CFN templates"
+          cfn-lint --info cfn/cfn-strands-lightsail-chainlit.yaml

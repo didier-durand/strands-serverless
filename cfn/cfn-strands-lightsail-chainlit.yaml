@@ -1,0 +1,99 @@
+---
+Description: >
+   template for Strands Chainlit app as AWS LightSail service
+
+Parameters:
+
+  Name:
+    Type: String
+    Default: 'strands-chainlit'
+
+  ChainlitAppRoot:
+    Type: String
+    Default: '/tmp'
+
+  # update secret (the value below is fake) with your own if you use advanced security beyond (username, password)
+  ChainlitAuthSecret:
+    Type: String
+    Default: '3q7.s1>zk*PRG46E,uip@03qOXY0CvCq.vuztOA7^-JuInv2l2hPv1TnfuV5bJzv'
+
+  ChainlitHost:
+    Type: String
+    Default: '0.0.0.0'
+
+  ChainlitPort:
+    Type: String
+    Default: '8888'
+
+  ChainlitDebug:
+    Type: String
+    Default: 'True'
+
+  ImageTag:
+    Type: String
+    Default: 'latest'
+
+  ImageRegistry:
+    Type: String
+    Default: 'didierdurand'
+
+Resources:
+
+  StrandsChainlitContainer:
+    Type: AWS::Lightsail::Container
+    DeletionPolicy: Delete
+    Properties:
+      ServiceName: !Sub '${Name}-${UnicitySuffix.Value}'
+      ContainerServiceDeployment:
+        Containers:
+            - ContainerName: !Sub '${Name}-container-${UnicitySuffix.Value}'
+              Environment:
+                # env var used by config.py::load_config to read file config.toml
+                - Variable: 'CHAINLIT_APP_ROOT'
+                  Value: !Ref ChainlitAppRoot
+                - Variable: 'CHAINLIT_AUTH_SECRET'
+                  Value: !Ref ChainlitAuthSecret
+                - Variable: 'CHAINLIT_HOST'
+                  Value: !Ref ChainlitHost
+                - Variable: 'CHAINLIT_PORT'
+                  Value: !Ref ChainlitPort
+                - Variable: 'CHAINLIT_DEBUG'
+                  Value: !Ref ChainlitDebug
+                - Variable: 'AWS_ACCESS_KEY_ID'
+                  Value: '{{resolve:ssm:strands-access-key-id:1}}'
+                - Variable: 'AWS_SECRET_ACCESS_KEY'
+                  Value: '{{resolve:ssm:strands-secret-access-keylychee:1}}'
+              Image: !Sub '${ImageRegistry}/${Name}:${ImageTag}'
+              Ports:
+                - Port: !Ref ChainlitPort
+                  Protocol: 'HTTP'
+        PublicEndpoint:
+          ContainerName: !Sub '${Name}-container-${UnicitySuffix.Value}'
+          ContainerPort: !Ref ChainlitPort
+          HealthCheckConfig:
+            HealthyThreshold: 2
+            IntervalSeconds: 5
+            Path: '/'
+            SuccessCodes: '200'
+            TimeoutSeconds: 2
+            UnhealthyThreshold: 2
+      IsDisabled: 'false'
+      Power: 'xlarge'
+      Scale: 1
+      Tags:
+        - Key: 'Name'
+          Value: !Sub '${Name}-${UnicitySuffix.Value}'
+
+  UnicitySuffix:
+    Type: AWS::SSM::Parameter
+    DeletionPolicy: Delete
+    Properties:
+      Type: String
+      Name: !Join
+        - '-'
+        - - !Sub 'unicity-suffix-lightsail-${Name}'
+          - !Select [ 0, !Split [ '-', !Select [ 2, !Split [ /, !Ref AWS::StackId ] ] ] ]
+      Value: !Select [ 0, !Split [ '-', !Select [ 2, !Split [ /, !Ref AWS::StackId ] ] ] ]
+      Tags:
+        Key: 'Name'
+        Value: !Sub '${Name}-${AWS::StackId}'
