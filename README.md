@@ -25,7 +25,7 @@ This first experiment is the composition of [Strands Agents](https://strandsagen
 virtual cloud server. 
 
 Strands Agents is the agentic framework [released by Amazon Web Services on May 16th, 2025](https://aws.amazon.com/blogs/opensource/introducing-strands-agents-an-open-source-ai-agents-sdk/):
-"*. The open source Strands Agents project takes a model-driven approach to building and running AI agents in just a 
+"*The open source Strands Agents project takes a model-driven approach to building and running AI agents in just a 
 few lines of code. Strands Agents scales from simple to complex agent use cases, and from local development to deployment in 
 production. Multiple teams at AWS already use Strands for their AI agents in production, including Amazon Q Developer, 
 AWS Glue, and VPC Reachability Analyzer.*"
