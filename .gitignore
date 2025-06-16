@@ -3,6 +3,8 @@
 test/.chainlit
 **/chainlit.md
 **/*.mp3
+!assets/*.mp3
+!assets/*.log
 **/*.svg
 !assets/*.svg
 .files

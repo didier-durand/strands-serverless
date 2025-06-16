@@ -12,7 +12,7 @@ Parameters:
     Type: String
     Default: '/tmp'
 
-  # update secret (the value below is fake) with your own if you use advanced security beyond (username, password)
+  # update secret (the value below is fake) with your own if you use advanced security Chainlit beyond (username, password)
   ChainlitAuthSecret:
     Type: String
     Default: '3q7.s1>zk*PRG46E,uip@03qOXY0CvCq.vuztOA7^-JuInv2l2hPv1TnfuV5bJzv'
@@ -28,6 +28,20 @@ Parameters:
   ChainlitDebug:
     Type: String
     Default: 'True'
+
+  # see for pricing: https://aws.amazon.com/lightsail/pricing/
+  LightSailPower:
+    Type: String
+    Default: 'small'
+
+  # it is recommended not to copy/paste your IAM credentials directly in here. 'resolve:ssm:etc.' allows reading them directly from SSM.
+  AwsAccessKeyId:
+    Type: String
+    Default: '{{resolve:ssm:strands-lightsail-aws-access-key-id:1}}'
+
+  AwsSecretAccessKey:
+    Type: String
+    Default: '{{resolve:ssm:strands-lightsail-aws-secret-access-key:1}}'
 
   ImageTag:
     Type: String
@@ -60,9 +74,9 @@ Resources:
                 - Variable: 'CHAINLIT_DEBUG'
                   Value: !Ref ChainlitDebug
                 - Variable: 'AWS_ACCESS_KEY_ID'
-                  Value: '{{resolve:ssm:strands-access-key-id:1}}'
+                  Value: !Ref AwsAccessKeyId
                 - Variable: 'AWS_SECRET_ACCESS_KEY'
-                  Value: '{{resolve:ssm:strands-secret-access-keylychee:1}}'
+                  Value: !Ref AwsSecretAccessKey
               Image: !Sub '${ImageRegistry}/${Name}:${ImageTag}'
               Ports:
                 - Port: !Ref ChainlitPort
@@ -78,7 +92,7 @@ Resources:
             TimeoutSeconds: 2
             UnhealthyThreshold: 2
       IsDisabled: 'false'
-      Power: 'xlarge'
+      Power: !Ref LightSailPower
       Scale: 1
       Tags:
         - Key: 'Name'
