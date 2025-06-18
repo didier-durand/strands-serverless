@@ -24,6 +24,9 @@ jobs:
       matrix:
         python-version: ["3.12"]
 
+    env:
+      MCP_GITHUB_PAT: ${{ secrets.MCP_GITHUB_PAT }}
+
     steps:
 
     - name: checkout code from repo
