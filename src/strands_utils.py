@@ -6,7 +6,7 @@ from enum import Enum
 from os.path import isfile, isdir
 from pathlib import Path
 
-
+from pydantic import BaseModel
 from starlette.applications import Starlette
 
 from fastapi import FastAPI
@@ -55,6 +55,27 @@ class EventType(Enum):
     REASONING = "reasoning"
     REASONING_TEXT = "reasoningText"
     REASONING_SIGNATURE = "reasoning_signature"
+
+class BedrockModel(BaseModel):
+    model_id: str | None = None
+    temperature: float | None = None
+    max_tokens: int | None = None
+    top_p: float | None = None
+
+class AgentParameters(BaseModel):
+    system_prompt: str | None = None
+    tools: list[StrandsTool] | None = None
+    model: BedrockModel | None = None
+
+class AgentConfig(BaseModel):
+    echo: bool = False
+    id: str | None = None
+    agent_parameters: AgentParameters | None = None
+
+class AgentInstance(BaseModel):
+    model: BedrockModel | None = None
+    system_prompt: str | None = None
+    tools: list[StrandsTool] | None = None
 
 
 def check_event(event) -> list[EventType] | None:
