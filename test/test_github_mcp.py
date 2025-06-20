@@ -7,7 +7,14 @@ from fastmcp.client import StreamableHttpTransport, ClientTransport
 from mcp import McpError
 from mcp.types import Tool
 
+from httpx_helpers import create_httpx_async_client_with_hooks
+
 GITHUB_REMOTE_MCP_URL = "https://api.githubcopilot.com/mcp/"
+
+REPO_OWNER = "didier-durand"
+REPO_NAME = "strands-serverless"
+
+HTTPX_HOOKS: bool = True
 
 HEADER_AUTHORIZATION = "Authorization"
 MCP_GITHUB_PAT = os.getenv("MCP_GITHUB_PAT")
@@ -17,13 +24,16 @@ MCP_GITHUB_PAT = os.getenv("MCP_GITHUB_PAT")
 
 @pytest.fixture(name="streamable_http_client", autouse=True)
 def fixture_streamable_http_client() -> Client[ClientTransport]:
-    return Client(
-        StreamableHttpTransport(url=GITHUB_REMOTE_MCP_URL,
-                                headers={HEADER_AUTHORIZATION: f"Bearer {MCP_GITHUB_PAT}"}
-                                )
-    )
+    transport_kwargs = {
+        "url": GITHUB_REMOTE_MCP_URL,
+        "headers": {HEADER_AUTHORIZATION: f"Bearer {MCP_GITHUB_PAT}"}
+    }
+    if HTTPX_HOOKS:
+        transport_kwargs["httpx_client_factory"] = create_httpx_async_client_with_hooks # noqa
 
-    # https://docs.github.com/en/copilot/customizing-copilot/using-model-context-protocol/using-the-github-mcp-server
+    return Client(
+        StreamableHttpTransport(**transport_kwargs)
+    )
 
 
 @pytest.mark.asyncio
@@ -93,7 +103,7 @@ async def test_call_tool_ko(streamable_http_client: Client[StreamableHttpTranspo
 
 @pytest.mark.asyncio
 async def test_call_tool_list_commits(streamable_http_client: Client[StreamableHttpTransport]):
-    """Test calling a list_commit tool"""
+    """Test calling a list_commits tool"""
     async with streamable_http_client:
         assert streamable_http_client.is_connected()
         result = await streamable_http_client.call_tool("list_commits",
